@@ -1,0 +1,9 @@
+# Raw data folders and master workbook
+data/
+youtube_master_analytics.xlsx
+*.csv
+
+# Python environment/caches
+__pycache__/
+.venv/
+.ipynb_checkpoints/
