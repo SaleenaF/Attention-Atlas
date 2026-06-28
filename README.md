@@ -1,5 +1,9 @@
 # Attention Atlas: Creator Intelligence Framework
 
+[![Live Dashboard](https://img.shields.io/badge/Streamlit-Live_Dashboard-red?logo=streamlit)](https://attention-atlas-analytics.streamlit.app/)
+
+An advanced analytics engineering and predictive framework built to ingest, transform, and model multi-dimensional audience retention and performance matrices from creator studio datasets.
+
 An advanced analytics engineering and predictive framework built to ingest, transform, and model multi-dimensional audience retention and performance matrices from creator studio datasets.
 
 ## Project Architecture & Workflow
