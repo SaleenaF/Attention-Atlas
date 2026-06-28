@@ -1,6 +1,5 @@
 # Data directory and master files
 data/
-*.db
 *.sqlite
 *.xlsx
 *.csv
