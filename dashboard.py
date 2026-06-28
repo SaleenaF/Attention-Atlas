@@ -455,44 +455,88 @@ with col4:
             geo_views_col = next((c for c in filtered_geo.columns if "view" in c.lower()), filtered_geo.columns[1])
             geo_clean = filtered_geo[filtered_geo[geo_name_col].astype(str).str.lower() != "total"].copy()
             
+            iso2_to_name = {
+                "US":"United States","PH":"Philippines","CA":"Canada","ID":"Indonesia",
+                "GB":"United Kingdom","IN":"India","DE":"Germany","RU":"Russia",
+                "MY":"Malaysia","BR":"Brazil","AU":"Australia","PL":"Poland",
+                "FR":"France","VN":"Vietnam","IT":"Italy","MX":"Mexico","TR":"Turkey",
+                "ES":"Spain","TH":"Thailand","NL":"Netherlands","SE":"Sweden",
+                "UA":"Ukraine","SG":"Singapore","AR":"Argentina","JP":"Japan",
+                "KR":"South Korea","NO":"Norway","FI":"Finland","DK":"Denmark",
+                "BE":"Belgium","CH":"Switzerland","AT":"Austria","NZ":"New Zealand",
+                "ZA":"South Africa","NG":"Nigeria","EG":"Egypt","SA":"Saudi Arabia",
+                "AE":"United Arab Emirates","IL":"Israel","PK":"Pakistan","BD":"Bangladesh",
+                "CO":"Colombia","CL":"Chile","PE":"Peru","CZ":"Czechia","RO":"Romania",
+                "HU":"Hungary","PT":"Portugal","GR":"Greece","RS":"Serbia","HR":"Croatia",
+                "SK":"Slovakia","BG":"Bulgaria","LT":"Lithuania","LV":"Latvia",
+                "EE":"Estonia","SI":"Slovenia","IE":"Ireland","HK":"Hong Kong",
+                "TW":"Taiwan","IR":"Iran","IQ":"Iraq","KZ":"Kazakhstan","UZ":"Uzbekistan",
+                "GE":"Georgia","AZ":"Azerbaijan","AM":"Armenia","BY":"Belarus",
+                "MD":"Moldova","AL":"Albania","BA":"Bosnia and Herzegovina","MK":"North Macedonia",
+                "ME":"Montenegro","LU":"Luxembourg","MT":"Malta","CY":"Cyprus",
+                "IS":"Iceland","LI":"Liechtenstein","AD":"Andorra","SM":"San Marino",
+                "MC":"Monaco","VE":"Venezuela","EC":"Ecuador","BO":"Bolivia","PY":"Paraguay",
+                "UY":"Uruguay","GY":"Guyana","SR":"Suriname","TT":"Trinidad and Tobago",
+                "JM":"Jamaica","CU":"Cuba","DO":"Dominican Republic","HT":"Haiti",
+                "GT":"Guatemala","HN":"Honduras","SV":"El Salvador","NI":"Nicaragua",
+                "CR":"Costa Rica","PA":"Panama","MA":"Morocco","DZ":"Algeria","TN":"Tunisia",
+                "LY":"Libya","SD":"Sudan","ET":"Ethiopia","KE":"Kenya","GH":"Ghana",
+                "CM":"Cameroon","CI":"Ivory Coast","SN":"Senegal","TZ":"Tanzania",
+                "UG":"Uganda","MZ":"Mozambique","MG":"Madagascar","ZW":"Zimbabwe",
+                "ZM":"Zambia","MW":"Malawi","BW":"Botswana","NA":"Namibia","RW":"Rwanda",
+                "MM":"Myanmar","KH":"Cambodia","LA":"Laos","MN":"Mongolia","NP":"Nepal",
+                "LK":"Sri Lanka","AF":"Afghanistan","IQ":"Iraq","SY":"Syria",
+                "JO":"Jordan","LB":"Lebanon","YE":"Yemen","OM":"Oman","KW":"Kuwait",
+                "QA":"Qatar","BH":"Bahrain","PS":"Palestine","KG":"Kyrgyzstan",
+                "TJ":"Tajikistan","TM":"Turkmenistan","PG":"Papua New Guinea",
+                "FJ":"Fiji","MV":"Maldives",
+            }
+            geo_clean = geo_clean.copy()
+            geo_clean["country_name"] = geo_clean[geo_name_col].map(iso2_to_name).fillna(geo_clean[geo_name_col])
             fig_map.add_trace(go.Choropleth(
-                locations=geo_clean[geo_name_col],
-                z=pd.to_numeric(geo_clean[geo_views_col], errors='coerce'),
-                locationmode="ISO-3",
+                locations=geo_clean["country_name"],
+                z=pd.to_numeric(geo_clean[geo_views_col], errors="coerce"),
+                locationmode="country names",
                 colorscale=[[0, "#19111C"], [0.2, ACCENT_DARK], [1, ACCENT]],
                 showscale=True,
                 colorbar=dict(len=0.6, thickness=15, tickfont=dict(color="#F3F4F6")),
-                hovertemplate="Country: %{location}<br>Views: %{z:,}<extra></extra>"
+                hovertemplate="<b>%{location}</b><br>Views: %{z:,}<extra></extra>"
             ))
             
     else: 
         if not cities.empty:
-            city_name_key = next((c for c in cities.columns if "city" in c.lower()), "city_name")
-            views_key = next((c for c in cities.columns if "view" in c.lower()), "views")
-            
+            city_name_key = next((c for c in cities.columns if "city" in c.lower()), cities.columns[0])
+            views_key = next((c for c in cities.columns if "view" in c.lower()), cities.columns[1])
+
             city_coords = {
-                "jakarta": [-6.2088, 106.8456], "singapore": [1.3521, 103.8198],
-                "new york": [40.7128, -74.0060], "moscow": [55.7558, 37.6173],
-                "quezon city": [14.6760, 121.0437], "london": [51.5074, -0.1278],
-                "toronto": [43.6532, -79.3832], "los angeles": [34.0522, -118.2437],
-                "manila": [14.5995, 120.9842], "kuala lumpur": [3.1390, 101.6869],
-                "sydney": [-33.8688, 151.2093], "vancouver": [49.2827, -123.1207]
+                "jakarta":      [-6.2088,  106.8456],
+                "singapore":    [ 1.3521,  103.8198],
+                "new york":     [40.7128,  -74.0060],
+                "moscow":       [55.7558,   37.6173],
+                "quezon city":  [14.6760,  121.0437],
+                "london":       [51.5074,   -0.1278],
+                "toronto":      [43.6532,  -79.3832],
+                "los angeles":  [34.0522, -118.2437],
+                "manila":       [14.5995,  120.9842],
+                "kuala lumpur": [ 3.1390,  101.6869],
+                "sydney":       [-33.8688,  151.2093],
+                "vancouver":    [49.2827, -123.1207],
             }
-            
+
             map_points = []
-            cities_clean = cities[cities[city_name_key].notna() & (cities[city_name_key].astype(str) != "")]
+            cities_clean = cities[cities[city_name_key].notna() & (cities[city_name_key].astype(str).str.lower() != "total")]
 
             for _, row in cities_clean.iterrows():
                 raw_name = str(row[city_name_key])
-                lower_name = raw_name.lower()
-                if lower_name in ["total", "", "nan"]: continue
-                match = next((k for k in city_coords if k in lower_name), None)
+                # names like "Jakarta, Indonesia" — match on city part only
+                lower_name = raw_name.split(",")[0].strip().lower()
+                match = next((k for k in city_coords if k in lower_name or lower_name in k), None)
                 if match:
                     try:
-                        views_val = str(row[views_key]).replace(',', '')
+                        views_val = str(row[views_key]).replace(",", "")
                         map_points.append({
                             "city": raw_name, "views": int(float(views_val)),
-                            "lat": city_coords[match][0], "lon": city_coords[match][1]
+                            "lat": city_coords[match][0], "lon": city_coords[match][1],
                         })
                     except: continue
 
